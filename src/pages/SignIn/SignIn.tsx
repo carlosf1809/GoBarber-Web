@@ -1,13 +1,17 @@
-import React, { useRef, useCallback, useContext } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import * as Yup from 'yup';
 import getValidationErros from '../../utils/getValidationErros';  
 
+<<<<<<< HEAD
 import { AuthContext } from '../../hooks/auth';
 import { AuthProvider } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
+=======
+import { useAuth } from '../../context/AuthContext'
+>>>>>>> 8daa498f99579e10303902100e354adad165089d
 
 import logoImg from '../../assets/logo.svg'
 import { Form } from '@unform/web'
@@ -25,8 +29,15 @@ interface SignInFormData{
 const SignIn: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
 
+<<<<<<< HEAD
     const { signIn } = useContext(AuthContext);
     const { addToast } = useToast();
+=======
+    const {user, signIn} = useAuth();
+
+    console.log(user)
+    
+>>>>>>> 8daa498f99579e10303902100e354adad165089d
     const handleSubmit = useCallback(async ( data: SignInFormData ) => {
         try{
             formRef.current?.setErrors({}); 
