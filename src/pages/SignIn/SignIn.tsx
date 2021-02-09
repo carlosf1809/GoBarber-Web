@@ -5,7 +5,9 @@ import Input from '../../components/Input';
 import * as Yup from 'yup';
 import getValidationErros from '../../utils/getValidationErros';  
 
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from '../../hooks/auth';
+import { AuthProvider } from '../../hooks/auth';
+import { useToast } from '../../hooks/toast';
 
 import logoImg from '../../assets/logo.svg'
 import { Form } from '@unform/web'
@@ -23,10 +25,8 @@ interface SignInFormData{
 const SignIn: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
 
-    const {user, signIn} = useContext(AuthContext)
-
-    console.log(user)
-    
+    const { signIn } = useContext(AuthContext);
+    const { addToast } = useToast();
     const handleSubmit = useCallback(async ( data: SignInFormData ) => {
         try{
             formRef.current?.setErrors({}); 
@@ -38,20 +38,27 @@ const SignIn: React.FC = () => {
 
             await schema.validate(data, {abortEarly:false});
 
-            !!signIn && signIn({
+            !!signIn && await signIn({
                 email : data.email,
                 password: data.password,
             });
         } catch(err) {
+            if (err instanceof Yup.ValidationError){
+                const errors = getValidationErros(err);
 
-            const errors = getValidationErros(err);
+                formRef.current?.setErrors(errors); 
+            } 
 
-            formRef.current?.setErrors(errors); 
+            !!addToast && addToast({
+                type: 'error',
+                title: 'Erro na autenticação',
+                description: 'Erro ao fazer login, cheque as credenciais'
+            });
         }
-    },[signIn]);
+    },[signIn, addToast]);
 
     return( 
-    <Container>
+    <Container> 
             <Content>
                 <img src={logoImg} alt="GoBarber"/>
 
