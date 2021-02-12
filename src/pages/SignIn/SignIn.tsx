@@ -4,7 +4,7 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import * as Yup from 'yup';
 import getValidationErros from '../../utils/getValidationErros';  
-import { Link  } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import { useToast } from '../../hooks/toast';
 import { useAuth } from '../../hooks/auth'
@@ -32,6 +32,8 @@ const SignIn: React.FC = () => {
     const {user, signIn} = useAuth();
 
     console.log(user)
+
+    const history = useHistory();
     
     const handleSubmit = useCallback(async ( data: SignInFormData ) => {
         try{
@@ -48,6 +50,14 @@ const SignIn: React.FC = () => {
                 email : data.email,
                 password: data.password,
             });
+
+            history.push('/dashboard');
+
+            !!addToast && addToast({
+                type: 'success',
+                title: 'Login válido',
+            });
+
         } catch(err) {
             if (err instanceof Yup.ValidationError){
                 const errors = getValidationErros(err);
@@ -63,7 +73,7 @@ const SignIn: React.FC = () => {
                 description: 'Erro ao fazer login, cheque as credenciais'
             });
         }
-    },[signIn, addToast]);
+    },[signIn, addToast, history]);
 
     return( 
     <Container> 

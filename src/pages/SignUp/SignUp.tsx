@@ -6,18 +6,33 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
-import { Link  } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import api from '../../services/api';
+import { useToast } from '../../hooks/toast';
 
 import logoImg from '../../assets/logo.svg'
 
 import {Container, Content, AnimationContainer, Background} from './styles'
 
+
+
+interface SignUpFormData {
+    name: string;
+    email: string;
+    password: string;
+  }
+
+  
+
 const SignUp: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
+    const { addToast } = useToast();
+    const history = useHistory();
+  
     
     console.log(formRef);
 
-    const handleSubmit = useCallback(async (data: object ) => {
+    const handleSubmit = useCallback(async (data: SignUpFormData ) => {
         try{
             formRef.current?.setErrors({}); 
 
@@ -29,16 +44,33 @@ const SignUp: React.FC = () => {
             });
 
             await schema.validate(data, {abortEarly:false});
-
             
-        } catch(err) {
-            console.log(err);
+            await api.post('/users', data);
 
-            const errors = getValidationErros(err);
+            history.push('/');
 
-            formRef.current?.setErrors(errors); 
-        }
-    },[]);
+            !!addToast && addToast({
+            type: 'success',
+            title: 'Cadastro realizado!',
+            description: 'Você já pode fazer seu logon no GoBarber!',
+            });
+
+            } catch(err) {
+                if (err instanceof Yup.ValidationError) {
+                    const errors = getValidationErros(err);
+          
+                    formRef.current?.setErrors(errors);
+          
+                    return;
+                  }
+          
+                  !!addToast && addToast({
+                    type: 'error',
+                    title: 'Erro no cadastro',
+                    description: 'Ocorreu um erro ao fazer cadastro, tente novamente.',
+                  });
+                }
+    },[addToast, history]);
     return (
         <Container>
         <Background></Background>
